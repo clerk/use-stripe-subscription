@@ -1,0 +1,29 @@
+{
+  "name": "use-stripe-subscription",
+  "type": "module",
+  "source": "src/index.ts",
+  "version": "1.0.0",
+  "exports": {
+    "require": "./dist/use-stripe-subscription.cjs",
+    "default": "./dist/use-stripe-subscription.modern.js"
+  },
+  "main": "./dist/use-stripe-subscription.cjs",
+  "module": "./dist/use-stripe-subscription.module.js",
+  "unpkg": "./dist/use-stripe-subscription.umd.js",
+  "types": "./dist/foo.d.ts",
+  "scripts": {
+    "build": "microbundle --jsx jsx --jsxImportSource react --globals react/jsx-runtime=jsx",
+    "dev": "microbundle watch --jsx jsx --jsxImportSource react --globals react/jsx-runtime=jsx"
+  },
+  "devDependencies": {
+    "microbundle": "^0.15.0"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^1.31.0",
+    "stripe": "^9.6.0",
+    "swr": "^1.3.0"
+  },
+  "peerDependencies": {
+    "react": ">=16"
+  }
+}

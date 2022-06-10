@@ -24,13 +24,13 @@ A demo of `use-stripe-subscription` in a Next.js project is [available here](htt
 
 - `products` - A list of available products and it's available pricing plans in tuple form `{product, prices}`
 - `subscription` - The active subscription
-- `redirectToCheckout()` - A method to initialize and redirect the current customer to a Checkout session. It is used for purchasing a **new** subscription. Arguments:
+- `redirectToCheckout()` - A method to initialize and redirect the current customer to a Checkout session. It is used for purchasing a **new subscription**. Arguments:
 
   - `price` - The ID of one of the Price objects associated with the Product. Use the `products` list to find a Price ID.
   - `successUrl` - URL where the customer is forwarded if successful. Returns back by default.
   - `cancelUrl` - URL where the customer is forwarded if unsuccessful. Returns back by default.
 
-- `redirectToCustomerPortal()` - A method to initialize and redirect the current customer to a Customer Portal session. It is used for managing an **existing** subscription. Arguments:
+- `redirectToCustomerPortal()` - A method to initialize and redirect the current customer to a Customer Portal session. It is used for managing an **existing subscription**. Arguments:
   - `returnUrl` - URL where the customer is sent when they choose to leave the Customer Portal. Returns back by default.
 
 [Demo implementation](https://github.com/clerkinc/use-stripe-subscription-demo/blob/main/pages/index.tsx)

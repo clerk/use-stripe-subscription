@@ -1,6 +1,6 @@
 # use-stripe-subscription
 
-`use-stripe-subscription` makes it easy to add Stripe Billing to a React application. It uses Stripe's SDK to create a standardized React SDK with familiar-feeling hooks and components.
+`use-stripe-subscription` makes it easy to add Stripe Billing to a React application. It extends Stripe's SDK with a standardized React SDK for familiar-feeling hooks and components.
 
 Learn more about this package from our blog: [Refactoring Stripe's API for Frontend Access](https://clerk.dev/blog/refactoring-stripes-api-for-frontend-access)
 

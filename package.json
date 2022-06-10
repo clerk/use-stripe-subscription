@@ -1,6 +1,7 @@
 {
   "name": "use-stripe-subscription",
   "license": "MIT",
+  "homepage": "https://github.com/clerkinc/use-stripe-subscription",
   "type": "module",
   "source": "src/index.ts",
   "version": "1.0.4",

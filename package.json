@@ -1,5 +1,6 @@
 {
   "name": "use-stripe-subscription",
+  "license": "MIT",
   "type": "module",
   "source": "src/index.ts",
   "version": "1.0.0",
@@ -13,7 +14,7 @@
   "types": "./dist/foo.d.ts",
   "scripts": {
     "build": "microbundle --jsx jsx --jsxImportSource react --globals react/jsx-runtime=jsx",
-    "dev": "microbundle watch --jsx jsx --jsxImportSource react --globals react/jsx-runtime=jsx"
+    "dev": "microbundle watch --compress false --jsx jsx --jsxImportSource react --globals react/jsx-runtime=jsx"
   },
   "devDependencies": {
     "microbundle": "^0.15.0"

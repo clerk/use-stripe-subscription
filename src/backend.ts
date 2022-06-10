@@ -1,11 +1,31 @@
 import Stripe from "stripe";
 
-export const stripeApiClient =
-  typeof window === "undefined"
-    ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: null,
-      })
-    : null;
+export const stripeApiClient = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: null,
+    })
+  : null;
+
+export interface CustomerHasFeatureArgs {
+  customerId: string;
+  feature: string;
+}
+export const customerHasFeature = async ({ customerId, feature }) => {
+  const customer = (await stripeApiClient.customers.retrieve(customerId, {
+    expand: ["subscriptions"],
+  })) as Stripe.Customer;
+  let subscription = customer.subscriptions.data[0] || null;
+  if (subscription) {
+    subscription = await stripeApiClient.subscriptions.retrieve(
+      subscription.id,
+      { expand: ["items.data.price.product"] }
+    );
+    const features = (subscription.items.data[0].price
+      .product as Stripe.Product).metadata.features;
+    return features?.includes(feature);
+  }
+  return false;
+};
 
 export const subscriptionHandler = async ({ customerId, query, body }) => {
   if (query.action === "useSubscription") {
@@ -16,8 +36,8 @@ export const subscriptionHandler = async ({ customerId, query, body }) => {
     return await redirectToCheckout({ customerId, body });
   }
 
-  if (query.action === "redirectToBillingPortal") {
-    return await redirectToBillingPortal({ customerId, body });
+  if (query.action === "redirectToCustomerPortal") {
+    return await redirectToCustomerPortal({ customerId, body });
   }
 
   return { error: "Action not found" };
@@ -78,10 +98,10 @@ async function useSubscription({ customerId }) {
   return { products, subscription };
 }
 
-async function redirectToBillingPortal({ customerId, body }) {
+async function redirectToCustomerPortal({ customerId, body }) {
   return await stripeApiClient.billingPortal.sessions.create({
     customer: customerId,
-    return_url: "http://localhost:3000",
+    return_url: body.returnUrl,
   });
 }
 
@@ -108,8 +128,8 @@ async function redirectToCheckout({ customerId, body }) {
   if (go) {
     return await stripeApiClient.checkout.sessions.create({
       customer: customerId,
-      success_url: "http://localhost:3000",
-      cancel_url: "http://localhost:3000",
+      success_url: body.successUrl,
+      cancel_url: body.cancelUrl,
       line_items: [{ price: body.price, quantity: 1 }],
       mode: "subscription",
     });

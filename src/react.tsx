@@ -1,22 +1,23 @@
 import useSWR, { SWRConfig } from "swr";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-
-const stripeClient =
-  typeof window !== "undefined"
-    ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
-    : null;
 
 const StripeContext = createContext(null);
 
 export const SubscriptionProvider = ({
   children,
   endpoint,
+  stripePublishableKey,
 }: {
+  stripePublishableKey: string;
   children: ReactNode;
   endpoint?: string;
 }) => {
+  const stripeClient = useMemo(() => loadStripe(stripePublishableKey), [
+    stripePublishableKey,
+    loadStripe,
+  ]);
   endpoint = endpoint || "/api/subscription";
   return (
     <StripeContext.Provider
@@ -36,6 +37,16 @@ export const SubscriptionProvider = ({
   );
 };
 
+export interface redirectToCheckoutArgs {
+  price: string;
+  successUrl?: string;
+  cancelUrl?: string;
+}
+
+export interface redirectToCustomerPortalArgs {
+  redirectUrl?: string;
+}
+
 export function useSubscription() {
   const { clientPromise, endpoint } = useContext(StripeContext);
   const { data, error } = useSWR(`${endpoint}?action=useSubscription`);
@@ -49,13 +60,19 @@ export function useSubscription() {
       subscription: undefined;
       products: undefined;
       redirectToCheckout: undefined;
-      redirectToBillingPortal: undefined;
+      redirectToCustomerPortal: undefined;
     };
   }
 
   const { products, subscription } = data;
 
-  const redirectToCheckout = async (args: any) => {
+  const redirectToCheckout = async (args: redirectToCheckoutArgs) => {
+    if (!args.successUrl) {
+      args.successUrl = window.location.href;
+    }
+    if (!args.cancelUrl) {
+      args.cancelUrl = window.location.href;
+    }
     const sessionResponse = await fetch(
       `${endpoint}?action=redirectToCheckout`,
       {
@@ -70,14 +87,21 @@ export function useSubscription() {
     window.location.href = session.url;
   };
 
-  const redirectToBillingPortal = async () => {
+  const redirectToCustomerPortal = async (
+    args: redirectToCustomerPortalArgs
+  ) => {
+    args = args || {};
+    if (!args.redirectUrl) {
+      args.redirectUrl = window.location.href;
+    }
     const sessionResponse = await fetch(
-      `${endpoint}?action=redirectToBillingPortal`,
+      `${endpoint}?action=redirectToCustomerPortal`,
       {
         method: "post",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(args),
       }
     );
     const session = await sessionResponse.json();
@@ -89,23 +113,31 @@ export function useSubscription() {
     products,
     subscription,
     redirectToCheckout,
-    redirectToBillingPortal,
+    redirectToCustomerPortal,
   };
 }
 
 interface GateProps {
   product?: any;
   unsubscribed?: boolean;
+  feature?: string;
   negate?: boolean;
   children?: ReactNode;
 }
 export const Gate = ({
   product,
   negate,
+  feature,
   unsubscribed,
   children,
 }: GateProps) => {
   const { isLoaded, products, subscription } = useSubscription();
+
+  if ([!!unsubscribed, !!product, !!feature].filter((x) => x).length !== 1) {
+    throw new Error(
+      `Please pass exactly one of unsubscribed, product, or feature to Gate`
+    );
+  }
 
   if (!isLoaded) {
     return null;
@@ -116,20 +148,26 @@ export const Gate = ({
     condition = subscription === null;
   }
 
-  if (product) {
+  if (product || feature) {
     if (subscription === null) {
       return null;
     }
     condition = false;
     for (let item of subscription.items.data) {
-      if (item.price.product === product.id) {
+      if (product && item.price.product === product.id) {
         condition = true;
+      } else if (feature) {
+        const productFeatures =
+          products
+            .find((x) => x.product.id === item.price.product)
+            .product.metadata.features?.split(",") || [];
+        for (let productFeature of productFeatures) {
+          if (productFeature === feature) {
+            condition = true;
+          }
+        }
       }
     }
-  }
-
-  if (!unsubscribed && !product) {
-    throw new Error("Please pass either unsubscribed or product to gate");
   }
 
   return (!negate && condition) || (negate && !condition) ? (

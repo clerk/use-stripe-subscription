@@ -4,7 +4,7 @@
 
 Learn more about this package from our blog: [Refactoring Stripe's API for Frontend Access](https://clerk.dev/blog/refactoring-stripes-api-for-frontend-access)
 
-## NPM
+## npm
 
 ```
 npm install use-stripe-subscription
@@ -16,13 +16,23 @@ npm install use-stripe-subscription
 
 A demo of `use-stripe-subscription` in a Next.js project is [available here](https://github.com/clerkinc/use-stripe-subscription-demo).
 
+## Stripe Product & Price modeling
+
+`use-stripe-subscription` relies on Stripe's Product and Price objects to manage subscriptions. Currently, the package only allows customers to subscribe to one Product at a time.
+
+Developers should treat "Products" as tiers (e.g. Free, Pro, Business), while "Prices" are different ways to pay for a Product (e.g. Monthly, Annually). These can be configured directly from the [Products page of the Stripe Dashboard](https://dashboard.stripe.com/test/products?active=true)
+
+After Products and Prices are configured, developers should configure their [Customer portal settings](https://dashboard.stripe.com/test/settings/billing/portal). The settings here are how `use-stripe-subscription` determines which Products and Prices users can purchase in a self-serve manner. For security reasons, `useSubscription()` only returns products that are listed in the "Products" section of this page.
+
+Developers can optionally add metadata to a Product that describes which "features" come with a subscription. Simply use a metadata key named **features**, and assign the value to a comma separated list of arbitrary features (no spaces, e.g. readFoo,writeBar). Then, the `<Gate feature="readFoo">` (React) and `customerHasFeature({customerId, feature: "writeBar"})` (Node) can be used to gate access to the application as needed.
+
 ## Reference
 
 ### useSubscription()
 
 `useSubscription()` is a hook that returns:
 
-- `products` - A list of available products and it's available pricing plans in tuple form `{product, prices}`
+- `products` - A list of available products and their available pricing plans in tuple form `{product, prices}`
 - `subscription` - The active subscription
 - `redirectToCheckout()` - A method to initialize and redirect the current customer to a Checkout session. It is used for purchasing a **new subscription**. Arguments:
 
@@ -49,7 +59,7 @@ A demo of `use-stripe-subscription` in a Next.js project is [available here](htt
 
 ### <SubscriptionProvider>
 
-A wrapper component that must be mounted at the top of your React tree to provide context to `useSubscription()` and `<Gate>`. Props:
+A wrapper component that must be mounted at the top of the React tree to provide context to `useSubscription()` and `<Gate>`. Props:
 
 - `stripePublishableKey` - Pass the Stripe Publishable Key here. Required if `redirectToCheckout()` or `redirectToCustomerPortal()` are used.
 - `endpoint` - The endpoint where `subscriptionHandler()` is running (see below). Defaults to **/api/subscription**
@@ -67,7 +77,7 @@ This function is used on the server to determine if the product the customer is 
 
 ### subscriptionHandler()
 
-This function is "mounted" on your server to communicate with the `useSubscription()` hook. We suggest mounting it on **/api/subscription**, but the location can be configured via `<SubscriptionProvider>`.
+This function is "mounted" on the application's server to communicate with the `useSubscription()` hook. We suggest mounting it on **/api/subscription**, but the location can be configured via `<SubscriptionProvider>`.
 
 The return value of `subscriptionHandler` should be passed directly into the HTTP Response body. Arguments:
 

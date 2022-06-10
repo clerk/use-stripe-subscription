@@ -44,7 +44,7 @@ export interface redirectToCheckoutArgs {
 }
 
 export interface redirectToCustomerPortalArgs {
-  redirectUrl?: string;
+  returnUrl?: string;
 }
 
 export function useSubscription() {
@@ -91,8 +91,8 @@ export function useSubscription() {
     args: redirectToCustomerPortalArgs
   ) => {
     args = args || {};
-    if (!args.redirectUrl) {
-      args.redirectUrl = window.location.href;
+    if (!args.returnUrl) {
+      args.returnUrl = window.location.href;
     }
     const sessionResponse = await fetch(
       `${endpoint}?action=redirectToCustomerPortal`,

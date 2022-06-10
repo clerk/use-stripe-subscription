@@ -3,7 +3,7 @@
   "license": "MIT",
   "type": "module",
   "source": "src/index.ts",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "exports": {
     "require": "./dist/use-stripe-subscription.cjs",
     "default": "./dist/use-stripe-subscription.modern.js"
@@ -11,7 +11,10 @@
   "main": "./dist/use-stripe-subscription.cjs",
   "module": "./dist/use-stripe-subscription.module.js",
   "unpkg": "./dist/use-stripe-subscription.umd.js",
-  "types": "./dist/foo.d.ts",
+  "files": [
+    "dist"
+  ],
+  "typings": "dist/types/src/index.d.ts",
   "scripts": {
     "build": "microbundle --jsx jsx --jsxImportSource react --globals react/jsx-runtime=jsx",
     "dev": "microbundle watch --compress false --jsx jsx --jsxImportSource react --globals react/jsx-runtime=jsx"

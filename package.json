@@ -4,7 +4,7 @@
   "homepage": "https://github.com/clerkinc/use-stripe-subscription",
   "type": "module",
   "source": "src/index.ts",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "exports": {
     "require": "./dist/use-stripe-subscription.cjs",
     "default": "./dist/use-stripe-subscription.modern.js"

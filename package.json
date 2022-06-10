@@ -3,7 +3,7 @@
   "license": "MIT",
   "type": "module",
   "source": "src/index.ts",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "exports": {
     "require": "./dist/use-stripe-subscription.cjs",
     "default": "./dist/use-stripe-subscription.modern.js"
